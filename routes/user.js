@@ -1,88 +1,159 @@
-// const express = require('express')
+// require('dotenv').config
+const express = require('express')
 const router = require('express').Router()
+const User = require("../models/user");
 
-//GETTING all
- router.get('/usertest', async (req, res) => {
-     res.send('user test is successful')
-//   try {
-//     const subscribers = await Subscriber.find()
-//     res.json(subscribers)
-//   } catch (err) {
-//     res.status(500).json({ message: err.message })
-//   }
- });
+const bcrypt = require("bcrypt");
 
-// //GETTING 1
-// router.get('/:id', getSubscriber, (req, res) => {
-//   res.json(res.subscriber)
-// })
+const jwt = require('jsonwebtoken')
+const { getUser } = require("../middleware/finders");
+const auth = require("../middleware/auth");
 
-//CREATING 1
-router.post('/userposttest', async (req, res) => {
-  const username = req.body.username 
-  res.send('your username is: ' + username)
-//     name: req.body.name,
-//     subscribedToChannel: req.body.subscribedToChannel
-//  })
-//  try {
-//    const newSubscriber = await subscriber.save()
-//    res.status(201).json(newSubscriber)
-//  } catch (err) {
-//   res.status(400).json ({ message: err.message })
-//   }
-})
+// router.use(express.json())
 
-router.get('appointments', async (req, res) => {
- req.collection.find({})
- .toArray()
- .then(results => res.json(results))
- .catch(error => res.send(error))
-})
-
-router.post('/appointments', async (req, res) => {
- const { appointmentDate, name, email }
- if (!appointmentDate || !name || !email {
-     return.res.status(400).json({
-         message: 'Appointment date, name, email are required',
-     })
- }
- const payload = { appointmentDate, name, email }
- req.collection.insertOne(payload)
- .then(result => res.json(result))
- 
+router.get('/usertest', (req, res) => {
+    res.send('user test success')
 })
 
 
-module.exports = router
-
-// //UPDATING 1
-// router.patch('/:id', getSubscriber, (req, res) =>{
- 
-// })
-
-// //DELETE 1
-// router.delete('/:id', getSubscriber, async (req, res) => {
-//   try {
-//     await res.subscriber.remove()
-//     res.json({ message: 'Deleted Subscriber' })
-//   } catch (err) {
-//     res.status(500).json({ message: err.message })
-//   }
-// })
-
-// async function getSubscriber(req, res, next) {
-//   let subscriber
-//   try {
-//     subscriber = await Subscriber.findById(req.params.id)
-//     if (subscriber == null) {
-//       return res.status(404).json({ message: 'Cannot find subscriber '})
+// GET all users
+router.get("/", async (req, res) => {
+    try {
+      const users = await User.find();
+      res.json(users);
+    } catch (error) {
+      res.status(500).send({ message: error.message });
+    }
+  });
+  
+  // GET one user
+  router.get("/:id", getUser, (req, res, next) => {
+    res.send(res.user);
+  });
+  
+  // LOGIN user with email + password
+  router.patch("/", async (req, res, next) => {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+  
+    if (!user) res.status(404).json({ message: "Could not find user" });
+    if (await bcrypt.compare(password, user.password)) {
+      try {
+        const access_token = jwt.sign(
+          JSON.stringify(user),
+          process.env.JWT_SECRET_KEY
+        );
+        res.status(201).json({ jwt: access_token });
+      } catch (error) {
+        res.status(500).json({ message: error.message });
+      }
+    } else {
+      res
+        .status(400)
+        .json({ message: "Email and password combination do not match" });
+    }
+  });
+  
+  // REGISTER a user
+  router.post("/", async (req, res, next) => {
+    const { name, email, contact, password } = req.body;
+  
+    console.log(name, email, contact, password)
+  
+    const salt = await bcrypt.genSalt();
+    console.log(salt)
+    const hashedPassword = await bcrypt.hash(password, salt);
+  
+    const user = new User({
+      name,
+      email,
+      contact,
+      password: hashedPassword,
+    });
+  
+    try {
+      const newUser = await user.save();
+  
+      try {
+        const access_token = jwt.sign(
+          JSON.stringify(newUser),
+          process.env.JWT_SECRET_KEY
+        );
+        res.status(201).json({ jwt: access_token });
+      } catch (error) {
+        res.status(500).json({ message: error.message });
+      }
+    } catch (error) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+  
+  // UPDATE a user
+  router.put("/:id", getUser, async (req, res, next) => {
+    const { name, contact, password, about } = req.body;
+    if (name) res.user.name = name;
+    if (contact) res.user.contact = contact;
+    if (about) res.user.about = about;
+    if (password) {
+      const salt = await bcrypt.genSalt();
+      const hashedPassword = await bcrypt.hash(password, salt);
+      res.user.password = hashedPassword;
+    }
+  
+    try {
+      const updatedUser = await res.user.save();
+      res.status(201).send(updatedUser);
+    } catch (error) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+  
+  // DELETE a user
+  router.delete("/:id", getUser, async (req, res, next) => {
+    try {
+      await res.user.remove();
+      res.json({ message: "Deleted user" });
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+  
+  
+//   // create cart
+//   router.post("/:id/cart", auth, async (req, res) => {
+//     const newCart = new Cart(req.body);
+  
+//     try {
+//       const savedCart = await newCart.save();
+//       res.status(200).json(savedCart);
+//     } catch (err) {
+//       res.status(500).json(err);
 //     }
-//   } catch (err) {
-//     return res.status(500).json({ message: err.message })
-//   }
-
-//   res.subscriber = subscriber
-//   next()
-// }
-
-// module.exports = router
+//   });
+  
+//   //UPDATE a cart
+//   router.put("/:id/cart", auth, async (req, res) => {
+//     try {
+//       const updatedCart = await Cart.findByIdAndUpdate(
+//         req.params.id,
+//         {
+//           $set: req.body,
+//         },
+//         { new: true }
+//       );
+//       res.status(200).json(updatedCart);
+//     } catch (err) {
+//       res.status(500).json(err);
+//     }
+//   });
+  
+//   //DELETE from cart
+//   router.delete("/:id/cart", auth, async (req, res) => {
+//     try {
+//       await Cart.findByIdAndDelete(req.params.id);
+//       res.status(200).json("Cart has been deleted...");
+//     } catch (err) {
+//       res.status(500).json(err);
+//     }
+//   });
+module.exports = router
