@@ -1,4 +1,4 @@
-// require('dotenv').config
+require('dotenv').config
 const express = require('express')
 const router = require('express').Router()
 const User = require("../models/user");
@@ -55,9 +55,9 @@ router.get("/", async (req, res) => {
   
   // REGISTER a user
   router.post("/", async (req, res, next) => {
-    const { name, email, contact, password } = req.body;
+    const { name, email, password } = req.body;
   
-    console.log(name, email, contact, password)
+    console.log(name, email, password)
   
     const salt = await bcrypt.genSalt();
     console.log(salt)
@@ -66,7 +66,6 @@ router.get("/", async (req, res) => {
     const user = new User({
       name,
       email,
-      contact,
       password: hashedPassword,
     });
   
@@ -76,7 +75,7 @@ router.get("/", async (req, res) => {
       try {
         const access_token = jwt.sign(
           JSON.stringify(newUser),
-          process.env.JWT_SECRET_KEY
+          process.env.MONGO_PASS
         );
         res.status(201).json({ jwt: access_token });
       } catch (error) {
@@ -88,10 +87,9 @@ router.get("/", async (req, res) => {
   });
   
   // UPDATE a user
-  router.put("/:id", getUser, async (req, res, next) => {
-    const { name, contact, password, about } = req.body;
+  router.put("/:id", getUser, async (req, res) => {
+    const { name, password, about } = req.body;
     if (name) res.user.name = name;
-    if (contact) res.user.contact = contact;
     if (about) res.user.about = about;
     if (password) {
       const salt = await bcrypt.genSalt();
@@ -108,7 +106,7 @@ router.get("/", async (req, res) => {
   });
   
   // DELETE a user
-  router.delete("/:id", getUser, async (req, res, next) => {
+  router.delete("/:id", getUser, async (req, res) => {
     try {
       await res.user.remove();
       res.json({ message: "Deleted user" });

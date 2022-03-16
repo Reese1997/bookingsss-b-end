@@ -4,7 +4,8 @@ const mongoose = require('mongoose')
 const dotenv = require('dotenv')
 const cors = require("cors");
 
-const userRoute = require('./routes/user')
+const userRoute = require('./routes/user');
+const user = require('./models/user');
 
 dotenv.config()
 
@@ -20,7 +21,7 @@ app.get('/user', () => {
 })
 
 // API routes
-app.post("/users", (req, res, next) => {
+app.get("/", (req, res, next) => {
     res.send({
       message: "Welcome to TrueCadence",
       user_routes: {
@@ -30,7 +31,6 @@ app.post("/users", (req, res, next) => {
           request_body: {
             name: "String",
             email: "String",
-            contact: "String",
             password: "String",
           },
           result: {
@@ -149,6 +149,7 @@ app.post("/users", (req, res, next) => {
 
 
 app.use(express.json())
+app.use("/user", user)
 
 app.listen(process.env.PORT || 8900, () => {
 console.log('Backend Server is running')
