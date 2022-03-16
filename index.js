@@ -20,7 +20,7 @@ app.get('/user', () => {
 })
 
 // API routes
-app.get("/", (req, res, next) => {
+app.post("/users", (req, res, next) => {
     res.send({
       message: "Welcome to TrueCadence",
       user_routes: {
@@ -38,7 +38,7 @@ app.get("/", (req, res, next) => {
           },
         },
         user_login: {
-          method: "PATCH",
+          method: "POST",
           route: "/users",
           request_body: {
             email: "String",
