@@ -5,11 +5,11 @@ require('dotenv').config
 
 router.get('/', (req, res) => res.send({ msg: `send contact using POST` }));
 
-router.post('/', (req, res) => {
+router.post('/contact', (req, res) => {
     const {name, email, message} = req.body
 var transporter = nodemailer.createTransport({
-  service: 'gmail',
-  host: "smtp.gmail.com",
+  service: 'icloud',
+  host: "smtp.icloud.com",
     port: 465,
     secure: true,
   auth: {
@@ -20,7 +20,7 @@ var transporter = nodemailer.createTransport({
 
 var mailOptions = {
   from: email,
-  to: 'reeseabrahams07@gmail.com',
+  to: 'reeseabrahams1997@icloud.com',
   subject: 'Sending Email using Node.js',
   text: `${name} has message you, saying:
 

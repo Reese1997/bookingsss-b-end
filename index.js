@@ -149,7 +149,7 @@ app.get("/", (req, res, next) => {
 
 
 app.use(express.json())
-app.use("/user", user)
+app.use("/users", userRoute)
 
 app.listen(process.env.PORT || 8900, () => {
 console.log('Backend Server is running')
