@@ -71,7 +71,7 @@ router.get("/", async (req, res) => {
   
     try {
       const newUser = await user.save();
-  
+       console.log(newUser)
       try {
         const access_token = jwt.sign(
           JSON.stringify(newUser),

@@ -1,36 +1,27 @@
-const express = require("express");
-const app = express.Router();
-const mongoose = require('mongoose')
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-require("dotenv").config();
+require('dotenv').config
+const express = require('express')
+const router = require('express').Router()
+const User = require("../models/user");
 
-function getToday() {
-    let today = new Date();
-    const dd = String(today.getDate()).padStart(2, "0");
-    const mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
-    const yyyy = today.getFullYear();
-  
-    today = mm + "/" + dd + "/" + yyyy;
-  
-    return today;
-  }
-  router.get('/booking', (req, res) => {
-    res.send('user test success')
-})
+const bcrypt = require("bcrypt");
+
+const jwt = require('jsonwebtoken')
+const { getUser } = require("../middleware/finders");
+const auth = require("../middleware/auth");
+
 
 // GET all users
 router.get("/", async (req, res) => {
     try {
-      const bookings = await User.find();
-      res.json(bookings);
+      const users = await User.find();
+      res.json(users);
     } catch (error) {
       res.status(500).send({ message: error.message });
     }
   });
   
   // GET one user
-  router.get("/:id", getBooking, (req, res, next) => {
+  router.get("/:id", getUser, (req, res, next) => {
     res.send(res.user);
   });
   
@@ -57,7 +48,8 @@ router.get("/", async (req, res) => {
     }
   });
   
-  router.post("/contact", async (req, res, next) => {
+  // REGISTER a user
+  router.post("/", async (req, res, next) => {
     const { name, email, password } = req.body;
   
     console.log(name, email, password)
@@ -74,7 +66,7 @@ router.get("/", async (req, res) => {
   
     try {
       const newUser = await user.save();
-  
+       console.log(newUser)
       try {
         const access_token = jwt.sign(
           JSON.stringify(newUser),
@@ -89,8 +81,8 @@ router.get("/", async (req, res) => {
     }
   });
   
-  // UPDATE 
-  router.put("/:id", getBooking, async (req, res) => {
+  // UPDATE a user
+  router.put("/:id", getUser, async (req, res) => {
     const { name, password, about } = req.body;
     if (name) res.user.name = name;
     if (about) res.user.about = about;
@@ -101,15 +93,15 @@ router.get("/", async (req, res) => {
     }
   
     try {
-      const updatedBooking = await res.booking.save();
-      res.status(201).send(updatedBooking);
+      const updatedUser = await res.user.save();
+      res.status(201).send(updatedUser);
     } catch (error) {
       res.status(400).json({ message: error.message });
     }
   });
   
-  // DELETE 
-  router.delete("/:id", getBooking, async (req, res) => {
+  // DELETE a user
+  router.delete("/:id", getUser, async (req, res) => {
     try {
       await res.user.remove();
       res.json({ message: "Deleted user" });
@@ -123,41 +115,5 @@ router.get("/", async (req, res) => {
 //       res.send(res.user);
 // //delete this
 
-//  create appointment
- router.post("/:id/appointment", auth, async (req, res) => {
-     const newAppointment = new Appointment(req.body);
-  
-     try {
-       const savedAppointment = await newAppointment.save();
-       res.status(200).json(savedAppointment);
-     } catch (err) {
-       res.status(500).json(err);
-   }
-   });
-  
-   //UPDATE an appointment
-  router.put("/:id/appointment", auth, async (req, res) => {
-    try {
-      const updatedAppointment = await Appointment.findByIdAndUpdate(
-        req.params.id,
-        {
-           $set: req.body,
-         },
-        { new: true }
-       );
-       res.status(200).json(updatedAppointment);
-     } catch (err) {
-      res.status(500).json(err);
-     }
-  });
-  
-   //DELETE from appointment
-   router.delete("/:id/appointment", auth, async (req, res) => {
-     try {
-       await Cart.findByIdAndDelete(req.params.id);
-       res.status(200).json("Appointment has been deleted...");
-     } catch (err) {
-       res.status(500).json(err);
-     }
-   });
+
 module.exports = router

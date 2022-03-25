@@ -15,6 +15,8 @@ mongoose
 .catch((err) => {
     console.log(err)
 })
+app.use(cors());
+
 
 app.get('/user', () => {
     console.log('test success')
