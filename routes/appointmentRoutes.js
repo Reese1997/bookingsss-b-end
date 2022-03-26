@@ -15,22 +15,22 @@ function getToday() {
   
     return today;
   }
-  router.get('/booking', (req, res) => {
+  router.get('/appointment', (req, res) => {
     res.send('user test success')
 })
 
 // GET all users
 router.get("/", async (req, res) => {
     try {
-      const bookings = await User.find();
-      res.json(bookings);
+      const appointment = await User.find();
+      res.json(appointment);
     } catch (error) {
       res.status(500).send({ message: error.message });
     }
   });
   
   // GET one user
-  router.get("/:id", getBooking, (req, res, next) => {
+  router.get("/:id", getAppointment, (req, res, next) => {
     res.send(res.user);
   });
   
@@ -57,7 +57,7 @@ router.get("/", async (req, res) => {
     }
   });
   
-  router.post("/contact", async (req, res, next) => {
+  router.post("/", async (req, res, next) => {
     const { name, email, password } = req.body;
   
     console.log(name, email, password)
@@ -90,7 +90,7 @@ router.get("/", async (req, res) => {
   });
   
   // UPDATE 
-  router.put("/:id", getBooking, async (req, res) => {
+  router.put("/:id", getAppointment, async (req, res) => {
     const { name, password, about } = req.body;
     if (name) res.user.name = name;
     if (about) res.user.about = about;
@@ -101,15 +101,15 @@ router.get("/", async (req, res) => {
     }
   
     try {
-      const updatedBooking = await res.booking.save();
-      res.status(201).send(updatedBooking);
+      const updatedAppointment = await res.appointment.save();
+      res.status(201).send(updatedAppointment);
     } catch (error) {
       res.status(400).json({ message: error.message });
     }
   });
   
   // DELETE 
-  router.delete("/:id", getBooking, async (req, res) => {
+  router.delete("/:id", getAppointment, async (req, res) => {
     try {
       await res.user.remove();
       res.json({ message: "Deleted user" });
